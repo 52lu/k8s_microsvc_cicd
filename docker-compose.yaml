@@ -1,0 +1,50 @@
+version: '3'
+
+networks:
+  backend:
+    driver: ${NETWORKS_DRIVER}
+
+services:
+  gitlab:
+    build:
+      context: ./gitlab
+      args:
+        - GITLAB_VERSION=${GITLAB_VERSION}
+    restart: always
+#    hostname: '10.3.10.43' #部署机器的ip,非容器ip(因为是本地不是线上所以用ip，线上的话可以用域名)
+    hostname: ${GITLAB_HOST_NAME} #部署机器的ip,非容器ip(因为是本地不是线上所以用ip，线上的话可以用域名)
+    environment:
+      TZ: 'Asia/Shanghai'
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url  'http://${GITLAB_HOST_NAME}'  #使用这个地址访问gitlab web ui(因为是本地不是线上所以用ip，线上的话可以用域名)
+        gitlab_rails['gitlab_shell_ssh_port'] = 2222 #ssh clone代码地址
+    ports:
+      - "${GITLAB_WEB_PORT}:80"       #web 80 端口
+      - '2222:22'      #ssh 检出代码 端口
+      #- '443:443'      #web 443 端口,本次未使用就不开放了
+    volumes:
+      - ${VOLUMES_PATH}/gitlab/etc:/etc/gitlab     #Gitlab配置文件目录
+      - ${VOLUMES_PATH}/gitlab/data:/var/opt/gitlab  #Gitlab数据目录
+      - ${VOLUMES_PATH}/gitlab/logs:/var/log/gitlab   #Gitlab日志目录
+    networks:
+      - backend
+  # jenkins
+  jenkins:
+    build:
+      context: ./jenkins
+      args:
+        - JENKINS_VERSION=${JENKINS_VERSION}
+    restart: always
+    environment:
+      JAVA_OPTS: '-Djava.util.logging.config.file=/var/jenkins_home/log.properties'
+    privileged: true
+    user: root
+    ports:
+      - "${JENKINS_PORT}:8080"
+      - "${JENKINS_JNLP_PORT}:50000"
+    volumes:
+      - ${VOLUMES_PATH}/jenkins/jenkins_home:/var/jenkins_home
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - '/usr/bin/docker:/usr/bin/docker'
+    networks:
+      - backend

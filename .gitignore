@@ -1,0 +1,20 @@
+# idea
+.idea
+*.iml
+.DS_Store
+**/.DS_Store
+
+#deploy data
+
+volumes/*
+!volumes/.gitkeep
+
+# gitlab ci
+.cache
+
+#vscode
+.vscode
+
+.env
+
+
