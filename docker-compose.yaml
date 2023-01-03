@@ -26,8 +26,8 @@ services:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
     ports:
-      - "${GITEA_WEB_PORT}:3000"
-      - "${GITEA_SSH_PORT}:22"
+      - ${GITEA_WEB_PORT}:3000
+      - ${GITEA_SSH_PORT}:22
     networks:
       - backend
     depends_on:
