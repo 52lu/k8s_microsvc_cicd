@@ -48,6 +48,6 @@ services:
       - ${JENKINS_DOCKER}:/usr/bin/docker
       - /usr/lib/x86_64-linux-gnu/libltdl.so.7:/usr/lib/x86_64-linux-gnu/libltdl.so.7
       # 非Linux环境运行，需要注释
-#      - ${LIBLTDL_SO}:/usr/lib/x86_64-linux-gnu/libltdl.so.7
+      - ${LIBLTDL_SO}:/usr/lib/x86_64-linux-gnu/libltdl.so.7
     networks:
       - backend
