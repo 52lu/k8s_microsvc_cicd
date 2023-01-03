@@ -11,3 +11,16 @@ $ cp env-exampl .env
 # 第三步:  
 
 ```
+
+## 2.启动Jenkins
+```shell
+# 1.启动服务(需要等一会儿)
+$ docker-compose up -d jenkins
+# 2.进入容器
+$ docker-compose exec  jenkins bash
+# 3.查看密码
+$ cat /var/jenkins_home/secrets/initialAdminPassword
+086d0f60b9e74ed1a8dead9e0958b471
+# 4.访问服务 http://127.0.0.1:19090/
+# 5.根据引导进行安装
+```
