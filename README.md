@@ -8,7 +8,9 @@ $ mkdir volumes && chmod 777 volumes
 # 第二步: 复制环境变量
 $ cp env-exampl .env
 
-# 第三步:  
+# 第三步: 修改.env
+# - 把GITEA_HOST修改你服务器对应的IP
+ 
 
 ```
 
