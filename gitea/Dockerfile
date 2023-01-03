@@ -1,0 +1,2 @@
+ARG GITEA_VERSION=lts
+FROM gitea/gitea:${GITEA_VERSION}

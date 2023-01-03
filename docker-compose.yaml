@@ -5,29 +5,46 @@ networks:
     driver: ${NETWORKS_DRIVER}
 
 services:
-  gitlab:
+  # gitea
+  gitea:
     build:
-      context: ./gitlab
+      context: ./gitea
       args:
-        - GITLAB_VERSION=${GITLAB_VERSION}
+        - GITEA_VERSION=${GITEA_VERSION}
     restart: always
-#    hostname: '10.3.10.43' #部署机器的ip,非容器ip(因为是本地不是线上所以用ip，线上的话可以用域名)
-    hostname: ${GITLAB_HOST_NAME} #部署机器的ip,非容器ip(因为是本地不是线上所以用ip，线上的话可以用域名)
     environment:
-      TZ: 'Asia/Shanghai'
-      GITLAB_OMNIBUS_CONFIG: |
-        external_url  'http://${GITLAB_HOST_NAME}'  #使用这个地址访问gitlab web ui(因为是本地不是线上所以用ip，线上的话可以用域名)
-        gitlab_rails['gitlab_shell_ssh_port'] = 2222 #ssh clone代码地址
-    ports:
-      - "${GITLAB_WEB_PORT}:80"       #web 80 端口
-      - '2212:22'      #ssh 检出代码 端口
-      #- '443:443'      #web 443 端口,本次未使用就不开放了
+      - USER_UID=1000
+      - USER_GID=1000
+      - ROOT_URL=${GITEA_ROOT_URL}:${GITEA_WEB_PORT}
+      - GITEA__database__DB_TYPE=postgres
+      - GITEA__database__HOST=postgres:5432
+      - GITEA__database__NAME=${GITEA_DB_NAME}
+      - GITEA__database__USER=${GITEA_DB_USER}
+      - GITEA__database__PASSWD=${GITEA_DB_PWD}
     volumes:
-      - ${VOLUMES_PATH}/gitlab/etc:/etc/gitlab     #Gitlab配置文件目录
-      - ${VOLUMES_PATH}/gitlab/data:/var/opt/gitlab  #Gitlab数据目录
-      - ${VOLUMES_PATH}/gitlab/logs:/var/log/gitlab   #Gitlab日志目录
+      - ${VOLUMES_PATH}/gitea:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    ports:
+      - "${GITEA_WEB_PORT}:3000"
+      - "${GITEA_SSH_PORT}:22"
     networks:
       - backend
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:14
+    restart: always
+    environment:
+      - POSTGRES_USER=${GITEA_DB_USER}
+      - POSTGRES_PASSWORD=${GITEA_DB_PWD}
+      - POSTGRES_DB=${GITEA_DB_NAME}
+    volumes:
+      - ${VOLUMES_PATH}/postgres:/var/lib/postgresql/data
+    networks:
+      - backend
+
   # jenkins
   jenkins:
     build:
