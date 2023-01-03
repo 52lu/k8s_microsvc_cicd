@@ -15,7 +15,9 @@ services:
     environment:
       - USER_UID=1000
       - USER_GID=1000
-      - ROOT_URL=${GITEA_ROOT_URL}:${GITEA_WEB_PORT}
+      - ROOT_URL=http://${GITEA_HOST}:${GITEA_WEB_PORT}
+      - DOMAIN=${GITEA_HOST}
+      - SSH_PORT=${GITEA_SSH_PORT}
       - GITEA__database__DB_TYPE=postgres
       - GITEA__database__HOST=postgres:5432
       - GITEA__database__NAME=${GITEA_DB_NAME}
