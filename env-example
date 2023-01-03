@@ -10,7 +10,7 @@ GITEA_SSH_PORT=2221
 GITEA_DB_NAME=gitea
 GITEA_DB_USER=gitea
 GITEA_DB_PWD=gitea
-GITEA_ROOT_URL=http://127.0.0.1
+GITEA_HOST=127.0.0.1
 
 ################## jenkins ##################
 JENKINS_VERSION=lts
