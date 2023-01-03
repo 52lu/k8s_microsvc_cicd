@@ -18,6 +18,6 @@ JENKINS_PORT = 19090
 JENKINS_JNLP_PORT = 50000
 JENKINS_DOCKER_SOCK=/var/run/docker.sock
 # 查看本地docker，whereis docker
-JENKINS_DOCKER=/usr/local/bin/docker
+JENKINS_DOCKER=/usr/bin/docker
 # centos7在这个路径，不添加
 LIBLTDL_SO=/usr/lib64/libltdl.so.7
