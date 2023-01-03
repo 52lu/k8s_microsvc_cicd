@@ -26,3 +26,8 @@ $ cat /var/jenkins_home/secrets/initialAdminPassword
 # 4.访问服务 http://127.0.0.1:19090/
 # 5.根据引导进行安装
 ```
+
+## 3. 启动Gitea
+```shell
+$ docker-compose up -d gitea
+```
