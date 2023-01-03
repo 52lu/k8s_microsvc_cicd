@@ -10,9 +10,9 @@ GITLAB_HOST_NAME=10.3.6.198
 GITLAB_WEB_PORT=8088
 
 ################## jenkins ##################
-JENKINS_VERSION = lts
-JENKINS_PORT = 19090
-JENKINS_JNLP_PORT = 50000
+JENKINS_VERSION=lts
+JENKINS_PORT=19090
+JENKINS_JNLP_PORT=50000
 JENKINS_DOCKER_SOCK=/var/run/docker.sock
 # 查看本地docker，whereis docker
 JENKINS_DOCKER=/usr/local/bin/docker
