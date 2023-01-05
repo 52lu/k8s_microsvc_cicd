@@ -53,8 +53,6 @@ services:
       context: ./jenkins
       args:
         - JENKINS_VERSION=${JENKINS_VERSION}
-        - KUBECTL_BIN_PATH=${KUBECTL_BIN_PATH}
-        - K8S_KUBE_CONFIG=${K8S_KUBE_CONFIG}
     restart: always
     environment:
       JAVA_OPTS: '-Djava.util.logging.config.file=/var/jenkins_home/log.properties'
@@ -67,6 +65,8 @@ services:
       - ${VOLUMES_PATH}/jenkins/jenkins_home:/var/jenkins_home
       - ${JENKINS_DOCKER_SOCK}:/var/run/docker.sock
       - ${JENKINS_DOCKER}:/usr/bin/docker
+      - ${KUBECTL_BIN_PATH}:/usr/local/bin/kubectl
+      - ${K8S_KUBE_CONFIG}:/root/.kube
       # 非Linux环境运行，需要注释
       - ${LIBLTDL_SO}:/usr/lib/x86_64-linux-gnu/libltdl.so.7
     networks:
