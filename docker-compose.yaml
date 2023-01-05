@@ -53,6 +53,8 @@ services:
       context: ./jenkins
       args:
         - JENKINS_VERSION=${JENKINS_VERSION}
+        - KUBECTL_BIN_PATH=${KUBECTL_BIN_PATH}
+        - K8S_KUBE_CONFIG=${K8S_KUBE_CONFIG}
     restart: always
     environment:
       JAVA_OPTS: '-Djava.util.logging.config.file=/var/jenkins_home/log.properties'
