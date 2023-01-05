@@ -24,4 +24,4 @@ LIBLTDL_SO=/usr/lib64/libltdl.so.7
 # kubectl可执行二进制文件路径
 KUBECTL_BIN_PATH=/usr/bin/kubectl
 # .kube/config
-KUBECTL_BIN_PATH=/root/.kube
+K8S_KUBE_CONFIG=/root/.kube
