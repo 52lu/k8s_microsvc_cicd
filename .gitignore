@@ -14,7 +14,7 @@ volumes/*
 
 #vscode
 .vscode
-
+*.txt
 .env
 
 

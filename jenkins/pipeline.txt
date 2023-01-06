@@ -1,0 +1,103 @@
+pipeline {
+  agent any
+  parameters {
+      gitParameter (
+        name: 'commit_id',
+        type: 'PT_REVISION', // PT_TAG：标签,PT_BRANCH：分支
+        branchFilter: 'origin/(.*)', // 不设置无法正常获取分支或标签
+        defaultValue: 'master',
+        selectedValue: 'TOP', // 定义选择的排序方式:NONE，TOP ，DEFAULT
+        quickFilterEnabled: true, // 是否开启搜索功能
+        sortMode: 'ASCENDING_SMART',
+        description: '选择需要构建的commit信息'
+     )
+  }
+  // 环境变量
+  environment {
+     AppName = "register"
+     AuthId = "gitlab-cert"
+     WorkGit = "ssh://git@192.168.1.200:2222/olanyun/saas-server.git"
+     RunType = "api"
+     DeployReplicas = 1 // Deploy副本数
+     PodMinReplicas = 1 // pod伸缩 最小副本数
+     PodMaxReplicas = 1 // pod伸缩 最大副本数
+  }
+
+  stages {
+      stage('构建信息')    {
+          steps {
+              sh 'echo commit_id：$commit_id'
+              sh "echo 构建服务：${env.AppName}-${env.RunType}"
+          }
+      }
+
+      stage('拉取源码') {
+          steps {
+              checkout([$class: 'GitSCM',
+              branches: [[name: '$commit_id']],
+              doGenerateSubmoduleConfigurations: false,
+              extensions: [],
+              submoduleCfg: [],
+              userRemoteConfigs: [[credentialsId: "${env.AuthId}", url: "${env.WorkGit}"]]])
+          }
+      }
+
+
+      stage('goctl版本') {
+          steps{
+              sh '/usr/local/bin/goctl -v'
+          }
+      }
+
+      stage('Dockerfile') {
+          steps{
+                 sh "yes | rm -rf app/${env.AppName}/${env.RunType}/Dockerfile" // 删除历史Dockerfile
+                 sh "cd app/${env.AppName}/${env.RunType} && /usr/local/bin/goctl docker -go ${env.AppName}.go && ls -l" // 生成dockerfile
+                 sh "sed -i 's/golang:alpine/liuqinghui\\/olango:1.19/g' app/${env.AppName}/${env.RunType}/Dockerfile"
+                 script{
+                     env.image = sh(returnStdout: true, script: "echo ${env.AppName}-${env.RunType}:${commit_id}").trim()
+                 }
+                 sh "echo 镜像名称：${image} && cp app/${env.AppName}/${env.RunType}/Dockerfile ./  && ls -l && docker build  -t ${image} ."
+          }
+      }
+
+
+      stage('上传镜像') {
+          steps{
+              //docker login 这里要注意，会把账号密码输出到jenkins页面，可以通过port.sh类似方式处理，官网文档有这里我就不详细写了
+              sh 'docker login --username=${docker_username} --password=${docker_pwd} http://${docker_repo}'
+              sh 'docker tag  ${image} ${docker_repo}/${app_namespace}/${image}'
+              sh 'docker push ${docker_repo}/${app_namespace}/${image}'
+          }
+      }
+
+      stage('部署到k8s') {
+          steps{
+              script{
+                  env.deployYaml = sh(returnStdout: true, script: "echo ${env.AppName}-${env.RunType}-deploy.yaml").trim()
+                  env.port=sh(returnStdout: true, script: "${env.WORKSPACE}/port.sh ${env.AppName}-${env.RunType}").trim()
+              }
+              sh 'echo ${port}'
+              sh 'rm -f ${deployYaml}'
+              sh "/usr/local/bin/goctl kube deploy -secret docker-login -replicas ${env.DeployReplicas} -minReplicas ${env.PodMinReplicas}  -maxReplicas ${env.PodMaxReplicas} -nodePort 3${port} -requestCpu 200 -requestMem 50 -limitCpu 300 -limitMem 100 -name ${env.AppName}-${env.RunType} -namespace ${app_namespace} -image ${docker_repo}/${app_namespace}/${image} -o ${deployYaml} -port ${port} -serviceAccount ${k8s_app_service_account} --home /var/jenkins_home/template"
+              // 查看
+              sh 'cat ${deployYaml}'
+              sh '/usr/local/bin/kubectl apply -f ${deployYaml}'
+          }
+      }
+
+       stage('Clean') {
+           steps{
+              // 忽略sh 错误
+              sh 'set +e'
+              sh "docker rmi  ${docker_repo}/${app_namespace}/${image}"
+              sh "docker images | grep ${env.AppName} | awk \'{print \$3}\'| xargs docker rmi -f"
+              sh "docker images | grep none | awk \'{print \$3}\'| xargs docker rmi -f "
+              // 清理工作目录
+              sh "ls -al ${env.WORKSPACE}"
+              deleteDir() // 清理当前目录
+              sh "ls -al ${env.WORKSPACE}"
+           }
+       }
+    }
+}
