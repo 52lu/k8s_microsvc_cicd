@@ -67,6 +67,8 @@ services:
       - ${JENKINS_DOCKER}:/usr/bin/docker
       - ${KUBECTL_BIN_PATH}:/usr/local/bin/kubectl
       - ${K8S_KUBE_CONFIG}:/root/.kube
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
       # 非Linux环境运行，需要注释
       - ${LIBLTDL_SO}:/usr/lib/x86_64-linux-gnu/libltdl.so.7
     networks:
