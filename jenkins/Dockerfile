@@ -5,4 +5,4 @@ FROM jenkins/jenkins:${JENKINS_VERSION}
 COPY ./goctl /usr/local/bin/goctl
 
 # 修改时区
-COPY /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+RUN cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
