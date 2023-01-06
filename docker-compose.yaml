@@ -70,6 +70,5 @@ services:
       - /usr/share/zoneinfo/Asia/Shanghai:/etc/localtime
       # 非Linux环境运行，需要注释
       - ${LIBLTDL_SO}:/usr/lib/x86_64-linux-gnu/libltdl.so.7
-#    command: "echo 'Asia/Shanghai' > /etc/timezone"
     networks:
       - backend
